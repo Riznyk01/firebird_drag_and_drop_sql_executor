@@ -8,6 +8,7 @@ import (
 type Viewing interface {
 	UpdateDBCorrectionDate(currentTime time.Time) error
 	GetDBCorrectionDate() (time.Time, error)
+	GetDBVersion() (string, error)
 }
 
 type Repository struct {

@@ -41,3 +41,17 @@ func (c *FirebirdClient) GetDBCorrectionDate() (time.Time, error) {
 	}
 	return dateVal, nil
 }
+
+func (c *FirebirdClient) GetDBVersion() (string, error) {
+	fc := "GetDBVersion"
+
+	query := "SELECT F_STR_VAL FROM V_PARAM_VALUES WHERE F_PARAM_NAME = ?"
+
+	var dbVer string
+	err := c.db.QueryRow(query, "db_ver").Scan(&dbVer)
+	if err != nil {
+		log.Printf("%s: %v\n", fc, err)
+		return "", err
+	}
+	return dbVer, nil
+}

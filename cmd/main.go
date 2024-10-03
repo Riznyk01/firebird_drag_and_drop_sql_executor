@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/fatih/color"
 	"golang.org/x/crypto/ssh/terminal"
@@ -8,6 +9,8 @@ import (
 	"os"
 	"sql_executor/internal/config"
 	"sql_executor/internal/repository"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -52,24 +55,48 @@ func main() {
 	}
 
 	repo := repository.NewRepository(db)
-	fmt.Printf("updating GBackDate...\n")
 
-	err = repo.UpdateDBCorrectionDate(time.Now())
-	if err != nil {
-		log.Printf("error occurred while updating GBackDate: %v\n", err)
-	} else {
-		fmt.Printf("GBackDate has been updated\n")
-	}
+	fmt.Printf("Please choose the option:\n")
+	fmt.Printf("1 to view db version\n")
+	fmt.Printf("2 to update GBackDate\n")
 
-	fmt.Printf("reading the actual GBackDate...\n")
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	option, _ := strconv.Atoi(strings.TrimSpace(input))
 
-	t, err := repo.GetDBCorrectionDate()
-	if err != nil {
-		fmt.Println(err)
-		log.Println(err)
-		<-time.After(cfg.InfoTimeout)
-	} else {
-		fmt.Printf("GBackDate is: %v\n", cyan(t))
-		<-time.After(cfg.InfoTimeout)
+	switch option {
+	case 1:
+		fmt.Printf("reading the db version...\n")
+		version, err := repo.GetDBVersion()
+		if err != nil {
+			fmt.Println(err)
+			log.Println(err)
+			<-time.After(cfg.InfoTimeout)
+		} else {
+			fmt.Printf("DB version is: %v\n", cyan(version))
+			<-time.After(cfg.InfoTimeout)
+		}
+	case 2:
+		fmt.Printf("updating GBackDate...\n")
+		err = repo.UpdateDBCorrectionDate(time.Now())
+		if err != nil {
+			log.Printf("error occurred while updating GBackDate: %v\n", err)
+		} else {
+			fmt.Printf("GBackDate has been updated\n")
+		}
+
+		fmt.Printf("reading the actual GBackDate...\n")
+
+		t, err := repo.GetDBCorrectionDate()
+		if err != nil {
+			fmt.Println(err)
+			log.Println(err)
+			<-time.After(cfg.InfoTimeout)
+		} else {
+			fmt.Printf("GBackDate is: %v\n", cyan(t))
+			<-time.After(cfg.InfoTimeout)
+		}
+	default:
+		fmt.Printf("invalid option\n")
 	}
 }
